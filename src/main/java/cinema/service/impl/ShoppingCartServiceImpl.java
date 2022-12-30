@@ -7,6 +7,7 @@ import cinema.model.ShoppingCart;
 import cinema.model.Ticket;
 import cinema.model.User;
 import cinema.service.ShoppingCartService;
+import java.util.Collections;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,7 +25,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         Ticket ticket = new Ticket();
         ticket.setMovieSession(movieSession);
         ticket.setUser(user);
-        ShoppingCart shoppingCart = shoppingCartDao.getByUser(user);
+        ShoppingCart shoppingCart = shoppingCartDao.getByUser(user)
+                .orElseThrow(() ->
+                        new RuntimeException("Can't get shoppingCart by user" + user.getEmail()));
         ticketDao.add(ticket);
         shoppingCart.getTickets().add(ticket);
         shoppingCartDao.update(shoppingCart);
@@ -32,7 +35,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ShoppingCart getByUser(User user) {
-        return shoppingCartDao.getByUser(user);
+        return shoppingCartDao.getByUser(user)
+                .orElseThrow(() ->
+                        new RuntimeException("Can't get shoppingCart by user" + user.getEmail()));
     }
 
     @Override
@@ -44,7 +49,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public void clear(ShoppingCart shoppingCart) {
-        shoppingCart.setTickets(null);
+        shoppingCart.setTickets(Collections.emptyList());
         shoppingCartDao.update(shoppingCart);
     }
 }
